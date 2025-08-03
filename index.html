@@ -57,10 +57,14 @@
         .nav-link:hover { color: #FFD700; transform: translateY(-2px); }
         .hamburger { display: none; }
         .mobile-menu { transition: max-height 0.3s ease-in-out; }
+        .typing-text { display: inline-block; min-width: 300px; text-align: left; }
+        .typing-cursor::after { content: '|'; animation: blink 0.7s infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
         @media (max-width: 768px) {
             .hamburger { display: block; }
             .nav-menu { display: none; }
             .nav-menu.active { display: block; max-height: 500px; }
+            .typing-text { min-width: 200px; }
         }
     </style>
 </head>
@@ -101,10 +105,13 @@
         </nav>
     </header>
 
-    <!-- Hero Section -->
+    <!-- Hero Section with Colored Typing Animation -->
     <section id="hero" class="gradient-bg text-white min-h-screen flex items-center justify-center pt-20">
         <div class="container mx-auto px-4 text-center">
-            <h1 class="text-4xl md:text-6xl font-bold mb-6 animate-fade-in">Empowering Tech Minds Through Digital Publishing</h1>
+            <h1 class="text-4xl md:text-6xl font-bold mb-6 animate-fade-in">
+                Empowering Tech Minds Through 
+                <span class="typing-text typing-cursor"></span>
+            </h1>
             <p class="text-lg md:text-xl max-w-3xl mx-auto mb-8">
                 DigiNexes is a digital publication company specializing in educational eBooks, tech magazines, and professional training. We offer expert-led coaching, facilitate industry placements, and publish insightful content that empowers learners and professionals.
             </p>
@@ -287,6 +294,78 @@
             mobileMenu.classList.toggle('max-h-[500px]');
             document.querySelector('.nav-menu').classList.toggle('active');
         });
+
+        // Typing Animation with Colored Words
+        const phrases = [
+            ['eBooks', 'Training', 'Magazines'],
+            ['Publications', 'Coaching', 'Insights'],
+            ['Resources', 'Skills', 'Trends']
+        ];
+        const colors = ['text-yellow-500', 'text-blue-400', 'text-gray-200']; // Gold, Light Blue, Soft White
+        const typingText = document.querySelector('.typing-text');
+        let phraseIndex = 0;
+        let wordIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+        let currentWords = phrases[phraseIndex];
+
+        function type() {
+            let displayText = '';
+            for (let i = 0; i < currentWords.length; i++) {
+                const word = currentWords[i];
+                if (i < wordIndex) {
+                    // Fully typed words
+                    displayText += `<span class="${colors[i]}">${word}</span>`;
+                } else if (i === wordIndex) {
+                    // Currently typing/deleting word
+                    displayText += `<span class="${colors[i]}">${word.substring(0, charIndex)}</span>`;
+                } else {
+                    // Words not yet reached
+                    displayText += '';
+                }
+                if (i === 0 && wordIndex > 0) displayText += ', ';
+                if (i === 1 && wordIndex > 1) displayText += ', and ';
+            }
+
+            typingText.innerHTML = displayText;
+
+            if (!isDeleting) {
+                charIndex++;
+                if (charIndex > currentWords[wordIndex].length) {
+                    if (wordIndex < currentWords.length - 1) {
+                        wordIndex++;
+                        charIndex = 0;
+                        setTimeout(type, 500); // Pause before next word
+                    } else {
+                        isDeleting = true;
+                        setTimeout(type, 1500); // Pause at full phrase
+                    }
+                } else {
+                    setTimeout(type, 100); // Typing speed
+                }
+            } else {
+                charIndex--;
+                if (charIndex < 0) {
+                    if (wordIndex > 0) {
+                        wordIndex--;
+                        charIndex = currentWords[wordIndex].length;
+                        setTimeout(type, 50); // Deleting speed
+                    } else {
+                        isDeleting = false;
+                        phraseIndex = (phraseIndex + 1) % phrases.length;
+                        currentWords = phrases[phraseIndex];
+                        wordIndex = 0;
+                        charIndex = 0;
+                        setTimeout(type, 500); // Pause before next phrase
+                    }
+                } else {
+                    setTimeout(type, 50); // Deleting speed
+                }
+            }
+        }
+
+        // Start typing animation
+        setTimeout(type, 1000);
     </script>
 </body>
 </html>
